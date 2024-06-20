@@ -1,4 +1,5 @@
 using DropboxLike.Domain.Models;
+using DropboxLike.Domain.Models.Responses;
 using DropboxLike.Domain.Repositories.File;
 
 namespace DropboxLike.Domain.Services.File;
@@ -12,14 +13,14 @@ public class FileService : IFileService
     _fileRepository = fileRepository;
   }
 
-    public async Task<OperationResult<object>> UploadSingleFileAsync(IFormFile file, string userId)
+    public async Task<OperationResult<object>> UploadSingleFileAsync(IFormFile file, string userId, string? folderId = null)
     {
-        return await _fileRepository.UploadFileAsync(file, userId);
+        return await _fileRepository.UploadFileAsync(file, userId, folderId);
     }
 
-    public async Task<OperationResult<Models.File>> DownloadSingleFileAsync(string fileId)
+    public async Task<OperationResult<Models.File>> DownloadSingleFileAsync(string fileId, string  userId)
     {
-        return await _fileRepository.DownloadFileAsync(fileId);
+        return await _fileRepository.DownloadFileAsync(fileId, userId);
     }
 
     public async Task<OperationResult<object>> DeleteSingleFileAsync(string fileId)
@@ -30,5 +31,10 @@ public class FileService : IFileService
     public async Task<OperationResult<List<FileMetadata>>> ListBucketFilesAsync(string userId)
     {
         return await _fileRepository.ListFilesAsync(userId);
+    }
+
+    public async Task<OperationResult<FileView>> ViewFileWithEditAsync(string fileId, string userId)
+    {
+        return await _fileRepository.ViewFileAsync(fileId, userId);
     }
 }

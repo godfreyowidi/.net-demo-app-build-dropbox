@@ -1,3 +1,4 @@
+using System.Text;
 using DropboxLike.Domain.Services.File;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,11 @@ public class FileController : BaseController
   
   [HttpPost]
   [Route("Upload")]
-  public async Task<IActionResult> UploadFileAsync(IFormFile file)
+  public async Task<IActionResult> UploadFileAsync(IFormFile file, string? folderId = null)
   {
     var userId = GetUserIdFromClaim();
 
-    var response = await _fileService.UploadSingleFileAsync(file, userId);
+    var response = await _fileService.UploadSingleFileAsync(file, userId, folderId);
 
     return StatusCode(response.StatusCode);
   }
@@ -33,7 +34,7 @@ public class FileController : BaseController
   {
     var userId = GetUserIdFromClaim();
     
-    var response = await _fileService.DownloadSingleFileAsync(fileId);
+    var response = await _fileService.DownloadSingleFileAsync(fileId, userId);
 
     if (!response.IsSuccessful)
     {
@@ -66,4 +67,37 @@ public class FileController : BaseController
     var message = $"Failed to delete file with ID {fileId} due to '{response.FailureMessage ?? "<>"}'";
     return StatusCode(response.StatusCode, message);
   }
+  
+  [HttpGet]
+  [Route("View/{fileId}")]
+  public async Task<IActionResult> ViewFileAsync(string fileId)
+  {
+    var userId = GetUserIdFromClaim();
+    var result = await _fileService.ViewFileWithEditAsync(fileId, userId);
+
+    if (!result.IsSuccessful)
+    {
+      if (!string.IsNullOrEmpty(result.FailureMessage))
+      {
+        return StatusCode((int)result.StatusCode, result.FailureMessage);
+      }
+
+      return BadRequest(result.FailureMessage);
+    }
+
+    var fileView = result.Value;
+    
+    byte[] bytes;
+    if (!fileView.IsBase64Encoded)
+    {
+      bytes = Encoding.UTF8.GetBytes(fileView.Content);
+    }
+    else
+    {
+      bytes = Convert.FromBase64String(fileView.Content);
+    }
+        
+    return File(bytes, fileView.ContentType);
+  }
+
 }

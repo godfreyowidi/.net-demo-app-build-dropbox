@@ -1,4 +1,5 @@
 using DropboxLike.Domain.Data.Entities;
+using DropboxLike.Domain.Models.Requests;
 using DropboxLike.Domain.Services.Token;
 using DropboxLike.Domain.Services.User;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,14 @@ public class AuthenticateController : ControllerBase
         _userService = userService;
     }
     
-    public async Task<IActionResult> Authenticate(string email, string password)
+    [HttpPost]
+    [Route("")]
+    public async Task<IActionResult> Authenticate([FromBody] UserCredentials request)
     {
-        var result = await _tokenManager.Authenticate(email, password);
+        var result = await _tokenManager.Authenticate(request.Email, request.Password);
         if (result.IsSuccessful)
         {
-            return Ok(new { Token = _tokenManager.NewToken(email, result.Value) });
+            return Ok(new { Token = _tokenManager.NewToken(request.Email, result.Value) });
         }
 
         if (result.FailureMessage != null) ModelState.AddModelError("Unauthorized", result.FailureMessage);
@@ -32,7 +35,7 @@ public class AuthenticateController : ControllerBase
     
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> RegisterUser(UserEntity request)
+    public async Task<IActionResult> RegisterUser([FromBody] UserCredentials request)
     {
         var result = await _userService.RegisterUserAsync(request.Email!, request.Password!);
 

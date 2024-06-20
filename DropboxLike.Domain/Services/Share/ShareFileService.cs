@@ -1,25 +1,24 @@
-﻿using DropboxLike.Domain.Data.Entities;
-using DropboxLike.Domain.Models;
+﻿using DropboxLike.Domain.Models;
 using DropboxLike.Domain.Repositories.Share;
 
 namespace DropboxLike.Domain.Services.Share;
 
 public class ShareFileService : IShareFileService
 {
-    private readonly IShareFileRepository _shareFileRepository;
+    private readonly IFileShareRepository _FileShareRepository;
 
-    public ShareFileService(IShareFileRepository shareFileRepository)
+    public ShareFileService(IFileShareRepository FileShareRepository)
     {
-        _shareFileRepository = shareFileRepository;
+        _FileShareRepository = FileShareRepository;
     }
     
     public Task<OperationResult<List<FileMetadata>>> GetSharedFilesByUserId(string userId)
     {
-        return _shareFileRepository.GetSharedFilesByUserId(userId);
+        return _FileShareRepository.GetSharedFilesByUserId(userId);
     }
 
-    public Task<OperationResult<string>> ShareFileWithUserAsync(string userId, string fileKey)
+    public Task<OperationResult<string>> ShareFileWithUsersAsync(IEnumerable<string> userIds, string fileId)
     {
-        return _shareFileRepository.ShareFileWithUserAsync(userId, fileKey);
+        return _FileShareRepository.ShareFileWithUsersAsync(userIds, fileId);
     }
 }

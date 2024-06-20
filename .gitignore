@@ -11,6 +11,7 @@
 *.sln.docstates
 
 DropboxLike.Api/appsettings.json
+.sonarqube/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
